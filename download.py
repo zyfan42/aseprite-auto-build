@@ -4,6 +4,7 @@ import os
 ASEPRITE_REPOSITORY = "aseprite/aseprite"
 SKIA_REPOSITORY = "aseprite/skia"
 SKIA_RELEASE_FILE_NAME = "Skia-Windows-Release-x64.zip"
+CHINESE_STRINGS_URL = "https://raw.githubusercontent.com/aseprite/strings/main/zh_Hans.ini"
 
 
 def get_latest_tag_aseprite():
@@ -50,10 +51,28 @@ def download_skia_for_windows(tag):
     os.system(f"7z x src/{SKIA_RELEASE_FILE_NAME} -osrc/skia")
 
 
+def download_chinese_strings():
+    print(f"Downloading Chinese strings from {CHINESE_STRINGS_URL}")
+    response = requests.get(CHINESE_STRINGS_URL)
+    response.raise_for_status()
+
+    # Path relative to where this script is run (root of repo)
+    # src/aseprite should be cloned by now
+    output_path = "src/aseprite/data/strings/zh_Hans.ini"
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    with open(output_path, "wb") as f:
+        f.write(response.content)
+    print(f"Saved to {output_path}")
+
+
 if __name__ == "__main__":
     aseprite_tag = get_latest_tag_aseprite()
     clone_aseprite(aseprite_tag)
     save_aseprite_tag(aseprite_tag)
+
+    download_chinese_strings()
 
     skia_tag = get_latest_tag_skia()
     download_skia_for_windows(skia_tag)
